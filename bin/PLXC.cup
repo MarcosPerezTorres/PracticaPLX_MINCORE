@@ -1,0 +1,173 @@
+import java_cup.runtime.*;
+
+parser code {:
+
+    public void syntax_error(Symbol cur_token){;}
+
+    public void unrecovered_syntax_error(Symbol cur_token){
+    System.err.println("Syntazx error. Line: "+ PLXC.getLine() + "Column: "+ PLXC.lex.getColumn());
+    PLXC.out.println("# Syntax Error");
+    PLXC.out.println("error;");
+    PLXC.out.println("halt;");
+    }
+:}
+
+action code {:
+    TablaSimbolos tabla = new TablaSimbolos();
+
+    int bloqueActual = 0;
+}
+
+/* Terminales */
+
+// Simbolos
+terminal A_LLAVE, C_LLAVE, PCOMA, AP, CP;
+terminal COMA, AC, CC;
+
+// Palabras reservadas
+terminal IF, ELSE, WHILE, DO, FOR, PRINT, TO, DOWNTO, STEP;
+
+// Tipos predefinidos
+terminal INT, FLOAT, CHAR;
+
+non terminal Bloque     Lista_de_sent;
+non terminal ListaVar   Lista_declar_var;
+non terminal Instruccion    Sentencia;
+non terminal               Paso, Var_for, Array, Lista_exp, Direccion_for, Else_if;
+non terminal Integer       Inicio_bloque;
+non terminal String        OperadorR, OperadorL, OperadorUPost, OperadorU, OperadorM;
+
+
+init with {::}
+
+
+/* Precedencia */
+precedence left COMA;
+precedence right ASIGNA;
+precedence left OLOG;
+precedence left YLOG;
+precedence left ADMIR;
+precedence left IGUAL, DIFERENTE;
+precedence left MAYOR, MAYORIG, MENOR, MENORIG;
+precedence left MAS, MENOS;
+precedence left MULT, DIVID, PORCENT;
+precedence left MASMAS, MENOSMENOS;
+precedence left AP, CP;
+precedence left MENOSUNARIO;
+
+
+
+/* Gramática */
+
+Lista_de_sent ::= Sentencia:s
+                    {: 
+                        Bloque b = new Bloque( PLXC.lex.getLine() )
+                        b.add( s );
+                        RESULT = b;
+                        :}
+
+                | Lista_de_sen:l Sentencia:s
+                    {:
+                        l.add( s );
+                        RESULT = l;
+                    :};
+
+Lista_exp ::=  Expresion:e
+            | Lista_exp:l COMA Expresion:e
+            ;
+
+ExpTipo ::= INT       {: RESULT = TipoInt.instancia; :}
+          | CHAR      {: RESULT = TipoChar.instancia; :}
+          | FLOAT     {: RESULT = TipoReal.instancia; :}
+          ;
+
+Expresion ::= Literal:l
+                {: RESULT = new ExpLiteral( PLXC.lex.getLine()); :}
+            | IDENT:i
+                {: 
+                    Objeto o = tabla.buscarObjeto( i );
+
+                    if ((o == null) || !(o.instanceof Variable)){
+                        throw new ParseException ( "Variable ("+ i +") no definida")
+                    }
+                
+                :}
+
+
+Sentencia ::= Lista_declar_var PCOMA
+            | Expresion PCOMA
+            | IF AP Expresion:c CP Sentencia
+                Else_if
+
+            | WHILE AP Expresion:c CP Sentencia
+
+            | DO Sentencia WHILE AP Expresion:c CP COMA
+
+            | FOR AP Expresion PCOMA Expresion:c PCOMA Expresion CP Sentencia
+
+            | PRINT AP Expresion:e CP PCOMA
+            | A_LLAVE Inicio_bloque:ba Lista_de_sent C_LLAVE
+                {:
+                    
+                    bloque_actual = ba;
+                :}
+            | A_LLAVE C_LLAVE
+            | FOR Var_for:v ASIGNA Expresion:ei Direccion_for:d Expresion:ef DO Sentencia
+            ;
+
+
+
+Lista_declar_var ::= ExpTipo:t IDENT:i
+                        {:
+                            tabla.declararVariable( i, bloque_actual, true, t );
+                            RESULT = new ListaVar ( PLXC.lex.getLine(), t );
+                        :}
+                    | ExpTipo:t IDENT:i AC ENTERO:e CC
+                    | ExpTipo:t IDENT:i ASIGNA Expresion:e
+                        {:
+                            Variable v = tabla.declararVariable( i, bloqueActual, true, t);
+                            ListaVar l = new ListaVar ( PLXC.getLine(), t );
+                            l.add( new LlamadaMetodo( PLXC.getLine(), new ExpVariable( PLXC.lex.getLine(), v),
+                                                                                Metodos.CONSTRUCTOR,
+                                                                                new Instruccion[]{e}
+                                                                                ) );
+
+                            RESULT = i;
+
+
+                        :}
+
+Inicio_bloque ::= {:
+                     RESULT = bloque_actual;
+                     cBloque++;
+                     bloque_actual = cBloque;
+                     :}
+                    ;
+
+Var_for ::= IDENT:i
+            ;
+
+Array ::= IDENT:i
+        | A_LLAVE Lista_exp:e C_LLAVE
+        ;
+
+OperadorA ::= MAS           {: RESULT = Metodos.MAS; :}
+            | MENOS         {: RESULT = Metodos.MENOS; :}
+            ;
+
+OperadorR ::= IGUAL         {: RESULT = Metodos.IGUAL; :}
+            | DIFERENTE     {: RESULT = Metodos.DIFERENTE; :}
+            | MENOR         {: RESULT = Metodos.MENOR; :}
+            | MENORIG       {: RESULT = Metodos.MENORIG; :}
+            | MAYOR         {: RESULT = Metodos.MAYOR; :}
+            | MAYORIG       {: RESULT = Metodos.MAYORIG; :}
+            ;
+
+OperadorL ::= YLOG      {: RESULT = Metodos.YLOG; :}
+            | OLOG      {: RESULT = Metodos.OLOG; :}
+            ;
+
+OperadorU ::= MASMAS     {: RESULT = Metodos.SIGUIENTE;:}
+            | MENOSMENOS        {: RESULT = Metodos.ANTERIOR; :}
+            | VIRGU             
+            | MENOS         {: RESULT = Metodos.OPUESTO; :}
