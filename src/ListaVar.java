@@ -2,9 +2,9 @@
 public class ListaVar extends Bloque {
 	private Tipo tipo;
 	
-	public ListaVar(int Linea, Tipo tipo) {
+	public ListaVar(int linea, Tipo tipo) {
 		super(linea);
-		super.tipo = tipo;
+		this.tipo = tipo;
 	}
 	
 	public Tipo getTipo() {
