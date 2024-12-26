@@ -1,5 +1,4 @@
-o
-public class LlamadaMetodo extends Instruccion{
+public class LlamadaMetodo extends Instruccion {
 	private Instruccion e1, param[];
 	private String metodo;
 	
@@ -24,10 +23,7 @@ public class LlamadaMetodo extends Instruccion{
 				oParam[k] = param[k].generarCodigo();
 			}
 		}
-		Objeto r = o1.generarCodigoMetodo(metodo, oParam, getLinea());
 		
-		return r;
-		
-		
+		return o1.generarCodigoMetodo(metodo, oParam, getLinea());
 	}
 }
