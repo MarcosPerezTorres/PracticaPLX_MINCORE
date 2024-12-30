@@ -10,6 +10,6 @@ public abstract class Instruccion {
 		return this.linea;
 	}
 	
-	public abstract void generarCodigo() throws Exception;
+	public abstract Objeto generarCodigo() throws Exception;
 
 }

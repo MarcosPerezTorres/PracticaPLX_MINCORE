@@ -1,3 +1,4 @@
+import java.io.PrintStream;
 
 public class PLXC {
 	public static PrintStream out;

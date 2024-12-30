@@ -1,4 +1,14 @@
+public class ExpTipo extends Instruccion {
+    private Tipo t;
 
-public class ExpTipo {
+    public ExpTipo(int linea, Tipo t) {
+        super(linea);
+        this.t = t;
+    }
 
+    @Override
+    public Objeto generarCodigo() throws Exception {
+        return t;
+    }
+    
 }

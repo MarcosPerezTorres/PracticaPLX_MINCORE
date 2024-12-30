@@ -9,8 +9,6 @@ public class Metodos {
 	public static final String SIGUIENTE = "$siguiente";
 	public static final String ANTERIOR = "$anterior";
 	
-	
-	
 	public static final String AND = "$and";
 	public static final String OR = "$or";
 	public static final String NOT = "$not";
@@ -26,11 +24,10 @@ public class Metodos {
 	
 	public static final String CREAR_LITERAL = "$crear_literal";
 	public static final String CREAR_VARIABLE = "$crear_variable";
-	public static final String COPIAR_VARIABLE = "$copiar_variable";
+	public static final String ASIGNAR = "$asignar";
 	
 	public static final String MOSTRAR = "$mostrar";
 	
 	public static final String PONER_ETQ = "$poner_etq";  	//poner etiqueta en la salida
-	public static final String SALTAR_ETQ = "$saltar_etq";	// saltar etiqueta
-	
+	public static final String SALTAR_ETQ = "$saltar_etq";	// saltar etiqueta	
 }
