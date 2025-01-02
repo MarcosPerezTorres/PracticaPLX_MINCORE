@@ -40,14 +40,12 @@ public class TablaSimbolos {
         tabla.remove(bloque);
     }
 
-    public Variable declararVariable(int linea, String nombre, Integer bloque, boolean mutable, Tipo tipo) throws Exception {
-        Objeto obj = buscar(nombre);
+    public Variable declararVariable(int linea, Variable v) throws Exception {
+        Objeto obj = buscar(v.getNombre());
 
-        if(obj != null && obj.getBloque() == bloque) {
-            throw new ParseException("Variable <" + nombre + "> ya declarada en el mismo bloque", linea);
+        if(obj != null && obj.getBloque() == v.getBloque()) {
+            throw new ParseException("Variable <" + v.getNombre() + "> ya declarada en el mismo bloque", linea);
         }
-
-        Variable v = new Variable(nombre, bloque, mutable, tipo);
         insertarObjeto(v);
 
         return v;
