@@ -8,6 +8,6 @@ public class ExpLiteral extends Instruccion {
 	
 	@Override
 	public Objeto generarCodigo() throws Exception {
-		return l;
+		return l.generarCodigoMetodo(Metodos.CREAR_LITERAL, null, getLinea());
 	}
 }

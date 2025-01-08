@@ -12,7 +12,6 @@ public class Literal extends Instancia {
 	
 	@Override
 	public Objeto generarCodigoMetodo(String metodo, Objeto[] param, int linea) throws Exception {
-		return getTipo().generarCodigoInstancia(this,metodo,param,linea);
+		return getTipo().generarCodigoInstancia(this, metodo, param, linea);
 	}
-
 }
