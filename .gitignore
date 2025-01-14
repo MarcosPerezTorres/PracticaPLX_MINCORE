@@ -1,5 +1,7 @@
 sample.plx
+out.ctd
 bin/
+ejemplos/
 src/Yylex.java
 src/parser.java
 src/sym.java
