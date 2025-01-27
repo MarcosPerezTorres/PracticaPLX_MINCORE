@@ -13,8 +13,8 @@ public class SentIF extends Instruccion {
     @Override
     public Objeto generarCodigo() throws Exception {
         Objeto expObj = exp.generarCodigo();
-        String etqFalse = Objeto.newEtiqueta();
-        String etqFinal = Objeto.newEtiqueta();
+        String etqFalse = Objeto.nuevaEtiqueta();
+        String etqFinal = Objeto.nuevaEtiqueta();
 
         if(!(expObj instanceof Instancia)) {
             throw new ParseException("La expresión del if debe ser una instancia (literal o variable)", getLinea());
@@ -22,10 +22,10 @@ public class SentIF extends Instruccion {
 
         // Intentamos convertirlo a booleano
         if(((Instancia) expObj).getTipo() != TipoBool.instancia) {
-            expObj = expObj.generarCodigoMetodo(Metodos.CAST, new Objeto[]{TipoBool.instancia}, getLinea());
+            expObj = expObj.generarCodigoMetodo(getLinea(), Metodos.CAST, new Objeto[]{TipoBool.instancia});
         }
 
-        PLXC.out.println("if (" + expObj.getIDC() + " == 0) goto " + etqFalse + ";"); // if (exp == 0) goto etqFalse;
+        PLXC.out.println("if (" + expObj.getID() + " == 0) goto " + etqFalse + ";"); // if (exp == 0) goto etqFalse;
         
         iTrue.generarCodigo();
         PLXC.out.println("goto " + etqFinal + ";"); // goto etqFinal;

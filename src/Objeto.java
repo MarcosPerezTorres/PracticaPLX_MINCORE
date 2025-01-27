@@ -1,48 +1,40 @@
-public abstract class Objeto implements Comparable<Objeto>{
-	private String nombre;
-	private int bloque;
-	private boolean mutable;
-	 
-	private static int numObj = 0;
-	private static int numEtq = 0;
-	 
-	public static String newNombObj() {
-		String n = "$t" + numObj;
-		numObj++;
-		return n;
-	}
+public abstract class Objeto implements Comparable<Objeto> {
+    private String nombre;
+    private int bloque;
+    private boolean mutable;
 
-	public static String newEtiqueta() {
-		String etq = "L" + numEtq;
-		numEtq++;
-		return etq;
-	}
-	 
-	public Objeto (String nombre, int bloque, boolean mutable) {
-		this.nombre = nombre;
-		this.bloque = bloque;
-		this.mutable = mutable;
-	}
-	 
-	public String getNombre() {
-		return nombre;
-	}
-	 
-	public int getBloque() {
-		return bloque;
-	}
-	 
-	public boolean getMutable() {
-		return mutable;
-	}
-	 
-	public String getIDC() {
-		return nombre+"$"+Integer.toString(bloque);
-	}
-	 
-	public abstract Objeto generarCodigoMetodo(String metodo, Objeto[] param, int linea) throws Exception;
-	    
-	@Override
+    private static int nombreId = 0;
+    private static int etqId = 0;
+
+    public static String nuevoNombre() {
+        String nombre = "$t" + nombreId;
+        nombreId++;
+        return nombre;
+    }
+
+    public static String nuevaEtiqueta() {
+        String etq = "L" + etqId;
+        etqId++;
+        return etq;
+    }
+
+    public Objeto(String nombre, int bloque, boolean mutable) {
+        this.nombre = nombre;
+        this.bloque = bloque;
+        this.mutable = mutable;
+    }
+
+    public String getNombre() { return this.nombre; }
+
+    public int getBloque() { return this.bloque; }
+
+    public boolean esMutable() { return this.mutable; }
+
+    public String getID() { return this.nombre + "$" + this.bloque; }
+
+    public abstract Objeto generarCodigoMetodo(int linea, String metodo, Objeto[] params) throws Exception;
+
+    @Override
     public int compareTo(Objeto obj) {
         if(obj == null) {
             throw new NullPointerException("El objeto con el que se intenta comparar es nulo");

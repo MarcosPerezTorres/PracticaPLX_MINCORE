@@ -19,8 +19,8 @@ public class CopiaYLlama extends Instruccion {
         Variable obj = (Variable) exp.generarCodigo();
 
         // La copiamos en otra
-        copia = new Variable(Objeto.newNombObj(), obj.getBloque(), obj.getMutable(), obj.getTipo());
-        copia.generarCodigoMetodo(Metodos.CREAR_VARIABLE, new Objeto[]{obj}, getLinea());
+        copia = new Variable(Objeto.nuevoNombre(), obj.getBloque(), obj.esMutable(), obj.getTipo());
+        copia.generarCodigoMetodo(getLinea(), Metodos.CREAR_VARIABLE, new Objeto[]{obj});
 
         if(params != null) {
             objParams = new Objeto[params.length];
@@ -30,7 +30,7 @@ public class CopiaYLlama extends Instruccion {
         }
 
         // Llamamos método
-        obj.generarCodigoMetodo(metodo, objParams, getLinea());
+        obj.generarCodigoMetodo(getLinea(), metodo, objParams);
 
         // Devolvemos el valor que tenía la variable antes
         return copia;

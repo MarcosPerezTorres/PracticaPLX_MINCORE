@@ -12,7 +12,7 @@ public class SentDOWHILE extends Instruccion {
     @Override
     public Objeto generarCodigo() throws Exception {
         Objeto expObj;
-        String etq = Objeto.newEtiqueta();
+        String etq = Objeto.nuevaEtiqueta();
 
         PLXC.out.println(etq + ":"); // etq:
         i.generarCodigo(); // i
@@ -25,10 +25,10 @@ public class SentDOWHILE extends Instruccion {
 
         // Intentamos convertir a booleano
         if(((Instancia) expObj).getTipo() != TipoBool.instancia) {
-            expObj = expObj.generarCodigoMetodo(Metodos.CAST, new Objeto[]{TipoBool.instancia}, getLinea());
+            expObj = expObj.generarCodigoMetodo(getLinea(), Metodos.CAST, new Objeto[]{TipoBool.instancia});
         }
 
-        PLXC.out.println("if (" + expObj.getIDC() + " != 0) goto " + etq + ";"); // if (exp != 0) goto etq;
+        PLXC.out.println("if (" + expObj.getID() + " != 0) goto " + etq + ";"); // if (exp != 0) goto etq;
 
         return null;
     }

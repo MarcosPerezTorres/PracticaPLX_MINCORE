@@ -1,10 +1,10 @@
 import java.text.ParseException;
 
-public class TipoInt extends Tipo {
-    public static final TipoInt instancia = new TipoInt();
+public class TipoFloat extends Tipo {
+    public static TipoFloat instancia = new TipoFloat();
 
-    private TipoInt() {
-        super(Predefinidos.INT, 0, false);
+    private TipoFloat() {
+        super(Predefinidos.FLOAT, 0, false);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class TipoInt extends Tipo {
                 if(!instancia.esMutable()) {
                     throw new ParseException("No se puede reasignar un valor a la constante <" + instancia.getNombre() + ">", linea);
                 }
-            case Metodos.CREAR_VARIABLE: // int a = ....
+            case Metodos.CREAR_VARIABLE: // float a = ....
                 obj = params[0];
                 
                 if(!(obj instanceof Instancia)) {
@@ -43,7 +43,8 @@ public class TipoInt extends Tipo {
                 
                 tipo = ((Instancia) obj).getTipo();
                 if(tipo != this) {
-                    throw new ParseException("<" + obj.getNombre() + "> no es de tipo " + getNombre(), linea);
+                    // Intento convertir a real
+                    obj = obj.generarCodigoMetodo(linea, Metodos.CAST, new Objeto[]{this});
                 }
 
                 PLXC.out.println(instancia.getID() + " = " + obj.getID() + ";");
@@ -57,15 +58,11 @@ public class TipoInt extends Tipo {
                 }
 
                 switch(params[0].getNombre()) {
-                    case Predefinidos.INT:
-                        return instancia;
-                    case Predefinidos.CHAR:
-                        var = new Variable(nuevoNombre(), instancia.getBloque(), false, (Tipo) params[0]);
-                        PLXC.out.println(var.getID() + " = " + instancia.getID() + ";");
-                        return var;
                     case Predefinidos.FLOAT:
+                        return instancia;
+                    case Predefinidos.INT:
                         var = new Variable(nuevoNombre(), instancia.getBloque(), false, (Tipo) params[0]);
-                        PLXC.out.println(var.getID() + " = (float) " + instancia.getID() + ";");
+                        PLXC.out.println(var.getID() + " = (int) " + instancia.getID() + ";");
                         return var;
                     case Predefinidos.BOOL:
                         var = new Variable(nuevoNombre(), instancia.getBloque(), false, (Tipo) params[0]);
@@ -95,22 +92,10 @@ public class TipoInt extends Tipo {
                 }
 
                 tipo = ((Instancia) obj).getTipo();
-
-                switch(tipo.getNombre()) {
-                    case Predefinidos.FLOAT:
-                        // Si el operando es un real, me convierto a real y dejo a la clase TipoFloat que haga la operación
-                        var = (Variable) instancia.generarCodigoMetodo(linea, Metodos.CAST, new Objeto[]{TipoFloat.instancia});
-                        return var.generarCodigoMetodo(linea, metodo, params);
-                    case Predefinidos.CHAR:
-                        if(!metodo.equals(Metodos.SUMA) && !metodo.equals(Metodos.RESTA)) {
-                            throw new ParseException("Método " + metodo + " no aplicable entre " + getNombre() + " y " + Predefinidos.CHAR, linea);
-                        }
-                    case Predefinidos.INT:
-                        break;
-                    default:
-                        throw new ParseException("Tipo inválido para operar con " + getNombre(), linea);
+                if(tipo != this) {
+                    obj = obj.generarCodigoMetodo(linea, Metodos.CAST, new Objeto[]{this});
                 }
-         
+
                 if(obj instanceof VariableArray) {
                     // Necesito copiarlo en una variable (por la sintaxis que tiene CTD)
                     var = new Variable(nuevoNombre(), instancia.getBloque(), false, tipo);
@@ -130,70 +115,20 @@ public class TipoInt extends Tipo {
 
                 switch(metodo) {
                     case Metodos.SUMA:
-                        PLXC.out.print(" + ");
+                        PLXC.out.print(" +r ");
                         break;
                     case Metodos.RESTA:
-                        PLXC.out.print(" - ");
+                        PLXC.out.print(" -r ");
                         break;
                     case Metodos.PRODUCTO:
-                        PLXC.out.print(" * ");
+                        PLXC.out.print(" *r ");
                         break;
                     case Metodos.DIVISION:
-                        PLXC.out.print(" / ");
+                        PLXC.out.print(" /r ");
                         break;
                 }
 
                 PLXC.out.println(obj.getID() + ";");
-
-                return var;
-            case Metodos.MODULO:
-                obj = params[0];
-
-                if(!(obj instanceof Instancia)) {
-                    throw new ParseException(obj.getNombre() + " no es una instancia (literal o variable)", linea);
-                }
-
-                if(((Instancia) obj).getTipo() != this) {
-                    obj = obj.generarCodigoMetodo(linea, Metodos.CAST, new Objeto[]{this});
-                }
-
-                Objeto cociente = instancia.generarCodigoMetodo(linea, Metodos.DIVISION, params); // $t0 = a / b;
-                Objeto mult = cociente.generarCodigoMetodo(linea, Metodos.PRODUCTO, params); // $t1 = $t0 * b;
-                return instancia.generarCodigoMetodo(linea, Metodos.RESTA, new Objeto[]{mult}); // $t2 = a - $t1
-            case Metodos.L_SHIFT:
-            case Metodos.R_SHIFT:
-                obj = params[0];
-                
-                if(!(obj instanceof Instancia)) {
-                    throw new ParseException("<" + obj + "> no es una instancia (literal o variable)", linea);
-                }
-
-                tipo = ((Instancia) obj).getTipo();
-
-                if(tipo != this) {
-                    throw new ParseException("<" + obj + "> no es de tipo " + getNombre(), linea);
-                }
-
-                String etqInicio = nuevaEtiqueta();
-                String etqFin = nuevaEtiqueta();
-
-                var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
-                PLXC.out.println(var.getID() + " = " + instancia.getID() + ";");
-
-                String cont = nuevoNombre();
-                PLXC.out.println(cont + " = 1;");
-
-                PLXC.out.println(etqInicio + ":");
-                PLXC.out.println("if(" + obj.getID() + " < " + cont + ") goto " + etqFin + ";");
-                PLXC.out.print(var.getID() + " = " + var.getID());
-                if(metodo.equals(Metodos.L_SHIFT)) {
-                    PLXC.out.println(" * 2;");
-                } else {
-                    PLXC.out.println(" / 2;");
-                }
-                PLXC.out.println(cont + " = " + cont + " + 1;");
-                PLXC.out.println("goto " + etqInicio + ";");
-                PLXC.out.println(etqFin + ":");
 
                 return var;
             // Operaciones de asignacion
@@ -264,16 +199,16 @@ public class TipoInt extends Tipo {
 
                 return var;
             case Metodos.SIG:
-                PLXC.out.println(instancia.getID() + " = " + instancia.getID() + " + 1;"); // $t0 = a + 1;
+                PLXC.out.println(instancia.getID() + " = " + instancia.getID() + " +r 1;"); // $t0 = a + 1;
 
                 return instancia;
             case Metodos.ANT:
-                PLXC.out.println(instancia.getID() + " = " + instancia.getID() + " - 1;"); // $t0 = a - 1;
+                PLXC.out.println(instancia.getID() + " = " + instancia.getID() + " -r 1;"); // $t0 = a - 1;
 
                 return instancia;
             case Metodos.OPUESTO:
                 var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
-                PLXC.out.println(var.getID() + " = 0 - " + instancia.getID() + ";"); // $t0 = 0 - a;
+                PLXC.out.println(var.getID() + " = 0 -r " + instancia.getID() + ";"); // $t0 = 0 - a;
 
                 return var;
             default:

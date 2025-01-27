@@ -9,7 +9,7 @@ public class Etiqueta extends Objeto {
     }
 
     @Override
-    public Objeto generarCodigoMetodo(String metodo, Objeto[] params, int linea) throws Exception {
+    public Objeto generarCodigoMetodo(int linea, String metodo, Objeto[] params) throws Exception {
         switch(metodo) {
             case Metodos.PONER_ETQ:
                 if(usada) {
@@ -17,7 +17,7 @@ public class Etiqueta extends Objeto {
                 }
                 PLXC.out.println(getNombre() + ": ");
                 break;
-            case Metodos.SALTAR_ETQ:
+            case Metodos.SALTAR_A_ETQ:
                 PLXC.out.println("goto " + getNombre() + ";");
                 break;
             default:

@@ -3,25 +3,52 @@ import java.text.ParseException;
 public class TipoBool extends Tipo {
     public static TipoBool instancia = new TipoBool();
 
+    private final String TRUE = "true";
+    private final String FALSE = "false";
+
     private TipoBool() {
         super(Predefinidos.BOOL, 0, false);
     }
 
     @Override
-    public Objeto generarCodigoMetodo(String metodo, Objeto[] param, int linea) throws Exception {
+    public Objeto generarCodigoMetodo(int linea, String metodo, Objeto[] params) throws Exception {
         return null;
     }
 
     @Override
-    public Objeto generarCodigoInstancia(Instancia instancia, String metodo, Objeto[] param, int linea) throws Exception {
+    public Objeto generarCodigoInstancia(int linea, Instancia instancia, String metodo, Objeto[] params) throws Exception {
         Objeto obj;
         Tipo tipo;
         Variable var;
         Etiqueta etq;
 
         switch(metodo) {
-            case Metodos.CREAR_VARIABLE:
-                obj = param[0];
+            case Metodos.MOSTRAR:
+                // if (a == 0) write "false"
+                // else write "true"
+                String etqFinal = nuevaEtiqueta();
+                String etqFalse = nuevaEtiqueta();
+
+                PLXC.out.println("if (" + instancia.getID() + " == 0) goto " + etqFalse + ";");
+
+                for(int i = 0; i < TRUE.length(); i++) {
+                    PLXC.out.println("writec " + Character.codePointAt(TRUE, i) + ";");
+                }
+                PLXC.out.println("goto " + etqFinal + ";");
+
+                PLXC.out.println(etqFalse + ":");
+                for(int i = 0; i < FALSE.length(); i++) {
+                    PLXC.out.println("writec " + Character.codePointAt(FALSE, i) + ";");
+                }
+
+                PLXC.out.println(etqFinal + ":");
+                break;
+            case Metodos.ASIGNAR: // a = ....
+                if(!instancia.esMutable()) {
+                    throw new ParseException("No se pudo reasignar un valor a la constante <" + instancia.getNombre() + ">", linea);
+                }
+            case Metodos.CREAR_VARIABLE: // boolean a = ....
+                obj = params[0];
                 
                 if(!(obj instanceof Instancia)) {
                     throw new ParseException("<" + obj.getNombre() + "> no es una instancia (literal o variable)", linea);
@@ -32,8 +59,11 @@ public class TipoBool extends Tipo {
                     throw new ParseException("<" + obj.getNombre() + "> no es de tipo " + getNombre(), linea);
                 }
 
-                PLXC.out.println(instancia.getIDC() + " = " + obj.getIDC() + ";");
-                return param[0];
+                PLXC.out.println(instancia.getID() + " = " + obj.getID() + ";");
+                return params[0];
+            case Metodos.CREAR_LITERAL:
+                PLXC.out.println(instancia.getID() + " = " + ((Literal) instancia).getValor() + ";");
+                return instancia;
             // AND y OR (Mirar Clase CortoCircuito)
             // $t0 = a;
             // $t1 = $t0 (resultado);
@@ -43,31 +73,33 @@ public class TipoBool extends Tipo {
             // L:
             case Metodos.AND:
             case Metodos.OR:
-                if(param == null) {
+                if(params == null) {
                     throw new ParseException("No se pasaron parámetros para " + metodo, linea);
                 }
 
-                etq = (Etiqueta) param[0];
+                etq = (Etiqueta) params[0];
 
-                var = new Variable(newNombObj(), instancia.getBloque(), false, this);
-                var.generarCodigoMetodo(Metodos.CREAR_VARIABLE, new Objeto[]{instancia}, linea); // $t1 = $t0
+                var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
+                var.generarCodigoMetodo(linea, Metodos.CREAR_VARIABLE, new Objeto[]{instancia}); // $t1 = $t0
 
                 switch(metodo) {
                     case Metodos.AND:
-                        PLXC.out.println("if (" + var.getIDC() + " == 0) goto " + etq.getNombre() + ";");
+                        PLXC.out.println("if (" + var.getID() + " == 0) goto " + etq.getNombre() + ";");
                         break;
                     case Metodos.OR:
-                        PLXC.out.println("if (" + var.getIDC() + " == 1) goto " + etq.getNombre() + ";");
+                        PLXC.out.println("if (" + var.getID() + " == 1) goto " + etq.getNombre() + ";");
                         break;
                 }
 
                 return var;
             case Metodos.NOT:
-                var = new Variable(newNombObj(), instancia.getBloque(), false, this);
-                PLXC.out.println(var.getIDC() + " = 1 - " + instancia.getIDC() + ";");
+                var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
+                PLXC.out.println(var.getID() + " = 1 - " + instancia.getID() + ";");
                 return var;
             default:
                 throw new ParseException("Método " + metodo + " no permitido para " + getNombre(), linea);
         }
+
+        return null;
     }
 }

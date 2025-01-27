@@ -12,8 +12,8 @@ public class SentWHILE extends Instruccion {
     @Override
     public Objeto generarCodigo() throws Exception {
         Objeto expObj;
-        String etqComienzo = Objeto.newEtiqueta();
-        String etqFinal = Objeto.newEtiqueta();
+        String etqComienzo = Objeto.nuevaEtiqueta();
+        String etqFinal = Objeto.nuevaEtiqueta();
 
         PLXC.out.println(etqComienzo + ":"); // etqComienzo:
         
@@ -25,10 +25,10 @@ public class SentWHILE extends Instruccion {
 
         // Intentamos convertirlo a booleano
         if(((Instancia) expObj).getTipo() != TipoBool.instancia) {
-            expObj = expObj.generarCodigoMetodo(Metodos.CAST, new Objeto[]{TipoBool.instancia}, getLinea());
+            expObj = expObj.generarCodigoMetodo(getLinea(), Metodos.CAST, new Objeto[]{TipoBool.instancia});
         }
 
-        PLXC.out.println("if (" + expObj.getIDC() + " == 0) goto " + etqFinal + ";"); // if (exp == 0) goto etqFinal
+        PLXC.out.println("if (" + expObj.getID() + " == 0) goto " + etqFinal + ";"); // if (exp == 0) goto etqFinal
         
         i.generarCodigo();
         PLXC.out.println("goto " + etqComienzo + ";"); // goto etqComienzo
