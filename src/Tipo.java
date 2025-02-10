@@ -15,5 +15,6 @@ public abstract class Tipo extends Objeto {
         return this == tipo;
     }
 
+
     public abstract Objeto generarCodigoInstancia(int linea, Instancia instancia, String metodo, Objeto[] params) throws Exception;
 }

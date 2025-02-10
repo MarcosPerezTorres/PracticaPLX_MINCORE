@@ -7,6 +7,7 @@ public class TipoInt extends Tipo {
         super(Predefinidos.INT, 0, false);
     }
 
+
     @Override
     public Objeto generarCodigoMetodo(int linea, String metodo, Objeto[] params) throws Exception {
         return null;
@@ -274,6 +275,11 @@ public class TipoInt extends Tipo {
             case Metodos.OPUESTO:
                 var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
                 PLXC.out.println(var.getID() + " = 0 - " + instancia.getID() + ";"); // $t0 = 0 - a;
+
+                return var;
+            case Metodos.MASUNARIO:
+                var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
+                PLXC.out.println(var.getID() + " = " + instancia.getID() + ";"); // $t0 = a;
 
                 return var;
             default:

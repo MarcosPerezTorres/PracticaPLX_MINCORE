@@ -58,9 +58,9 @@ public class SentSelect extends Instruccion {
             }
         } else {
             if(etqInicioAnt == null) {
-                PLXC.out.println("if (" + var.getID() + " < " + toObj.getID() + ") goto " + etqDefault + ";"); 
+                PLXC.out.println("if (" + var.getID() + " < " + fromObj.getID() + ") goto " + etqDefault + ";"); 
             } else {
-                PLXC.out.println("if (" + var.getID() + " < " + toObj.getID() + ") goto " + etqInicioAnt + ";");
+                PLXC.out.println("if (" + var.getID() + " < " + fromObj.getID() + ") goto " + etqInicioAnt + ";");
             }
         }
         Objeto cuerpoObj = cuerpo.generarCodigo();

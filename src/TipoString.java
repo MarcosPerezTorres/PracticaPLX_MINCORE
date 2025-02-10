@@ -58,7 +58,7 @@ public class TipoString extends TipoArray {
                 }
 
                 tipoObj = ((Instancia) obj).getTipo();
-                
+            
                 if(!(tipoObj instanceof TipoString)) {
                     throw new ParseException("<" + obj.getNombre() + "> no es de tipo " + getNombre(), linea);
                 }
@@ -108,6 +108,39 @@ public class TipoString extends TipoArray {
                 PLXC.out.println(etqFin + ":");
 
                 return new VariableArray(instancia.getNombre(), obj.getID(), instancia.getBloque(), true, tipo.getTipoBase());
+            case Metodos.CAST:
+                if(!(params[0] instanceof Tipo)){
+                    throw new ParseException(params[0].getNombre() + " no es un tipo", linea);
+                }
+
+                Tipo tipoDestino = (Tipo) params[0];
+
+                if (tipoDestino instanceof TipoArray && ((TipoArray) tipoDestino).getTipoBase() instanceof TipoChar){
+                    // Convertir String a char[]
+                    VariableArray nuevoArray = new VariableArray(Objeto.nuevoNombre(), "0", instancia.getBloque(), false, new TipoArray(this.getSize(),TipoChar.instancia));
+
+                    for (int i = 0; i < this.getSize(); i++){
+                        tmp = Objeto.nuevoNombre();
+                        PLXC.out.println(tmp + " = " + ((VariableArray) instancia).getID(i) + ";");
+                        PLXC.out.println(nuevoArray.getID(i) + " = " + tmp + ";");
+                    }
+                    return nuevoArray;
+                }
+
+                if (tipoDestino instanceof TipoArray && ((TipoArray) tipoDestino).getTipoBase() instanceof TipoInt){
+                    // Convertir String a int[]
+                    VariableArray nuevoArray = new VariableArray(Objeto.nuevoNombre(), "0", instancia.getBloque(), false, new TipoArray(this.getSize(),TipoInt.instancia));
+
+                    for (int i = 0; i < this.getSize(); i++){
+                        tmp = Objeto.nuevoNombre();
+                        PLXC.out.println(tmp + " = " + ((VariableArray) instancia).getID(i) + ";");
+                        PLXC.out.println(nuevoArray.getID(i) + " = " + tmp + ";");
+                    }
+                    return nuevoArray;
+                }
+
+                throw new ParseException("No se puede convertir string a " + tipoDestino.getNombre(), linea);
+
             case Metodos.SUMA:
                 obj = params[0];
 

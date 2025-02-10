@@ -35,15 +35,15 @@ terminal Float REAL;
 terminal String CADENA;
 terminal CAST;
 
-terminal ALL, CLL, AP, CP, AC, CC, ASIG, PUNTO, COMA, PYC;
-terminal IF, ELSE, FOR, FORALL, FROM, TO, DOWNTO, STEP, DO, WHILE, PRINT, LENGTH, REPEAT, TIMES, SELECT, DEFAULT, WHERE, FIRST, LAST;
+terminal ALL, CLL, AP, CP, AC, CC, ASIG, PUNTO, COMA, PYC, INTER, DP;
+terminal IF, ELSE, FOR, FORALL, EXISTS, FROM, TO, DOWNTO, STEP, DO, WHILE, PRINT, LENGTH, REPEAT, TIMES, SELECT, DEFAULT, WHERE, FIRST, LAST, IN, CASE, SWITCH, BREAK, JUST;
 
-terminal MAS, MENOS, MULT, DIV, MOD, L_SHIFT, R_SHIFT;
+terminal MAS, MENOS, MULT, DIV, MOD, L_SHIFT, R_SHIFT, ELVIS;
 terminal MAS_IGUAL, MENOS_IGUAL, POR_IGUAL, DIV_IGUAL;
 terminal MASMAS, MENOSMENOS;
 terminal UNARIO;
 
-terminal AND, OR, NOT, IMPLICA;
+terminal AND, OR, NOT, IMPLICA, DOBLEIMPLICA;
 terminal MENOR, MENORIGUAL, MAYOR, MAYORIGUAL, IGUAL, DIST;
 
 /* NO TERMINALES */
@@ -56,30 +56,42 @@ non terminal Integer inicio_bloque;
 non terminal ListaVar lista_declaracion;
 non terminal List<SentSelect> lista_select;
 non terminal List<Integer> dimension;
+non terminal List<Case> lista_cases;
 non terminal Instruccion array_index;
+non terminal Bloque defaultSW;
+non terminal Instruccion break_Opt;
+non terminal Instruccion expIn;
+non terminal Case case_sent;
 non terminal ExpArray array, lista_exp;
 non terminal Instruccion inicio_for, cond_for, act_for, step;
+non terminal Instruccion lvalue;
 non terminal Boolean dir_for, dir_select;
 non terminal Tipo tipo;
 non terminal String op_mult, op_aditivo, op_shift, op_relacional, op_asignacion, op_unario, op_unario_post;
 non terminal Literal literal;
 
 /* PRECEDENCIA */
-precedence nonassoc AP;
+precedence nonassoc AP,CP;
 precedence left SELECT;
 precedence left ELSE;
 precedence left COMA;
-precedence right ASIG, MAS_IGUAL, MENOS_IGUAL, POR_IGUAL, DIV_IGUAL;
-precedence right IMPLICA;
+precedence right ASIG;
+precedence right INTER;
+precedence right DP;
+precedence right MAS_IGUAL, MENOS_IGUAL, POR_IGUAL, DIV_IGUAL;
+precedence right IMPLICA, DOBLEIMPLICA;
 precedence left OR;
 precedence left AND;
 precedence nonassoc NOT;
 precedence left MAYOR, MAYORIGUAL, MENOR, MENORIGUAL, IGUAL, DIST;
+precedence right ELVIS;
 precedence left L_SHIFT, R_SHIFT;
 precedence left MAS, MENOS;
 precedence left MULT, DIV, MOD;
+
 precedence nonassoc CAST;
 precedence nonassoc UNARIO, MASMAS, MENOSMENOS;
+
 
 /* GRAMÁTICA */
 lista_sent ::=  lista_sent:b sent:s
@@ -112,6 +124,14 @@ sent    ::= lista_declaracion:l PYC
         |   REPEAT sent:s exp:e TIMES PYC
             {:
                 RESULT = new SentRepeat(PLXC.lex.getLine(), s, e);
+            :}
+        |   REPEAT AP exp:e CP sent:s
+            {:
+                RESULT = new SentRepeat(PLXC.lex.getLine(), s, e);
+            :}
+        |   REPEAT JUST AP exp:e CP sent:s
+            {:
+                RESULT = new SentRepeatJust(PLXC.lex.getLine(), s , e);
             :}
         |   lista_select:l WHERE exp:e PYC
             {:
@@ -198,8 +218,83 @@ sent    ::= lista_declaracion:l PYC
 
                 RESULT = l;
             :}
+        |   FOR lvalue:l IN expIn:e DO sent:s
+            {:
+               RESULT = new SentFORIN(PLXC.lex.getLine(), l, e, s);
+            :}
+        |   SWITCH AP exp:e CP ALL lista_cases:l defaultSW:ds CLL
+            {:
+                RESULT = new SentSwitch(PLXC.lex.getLine(),e,l,ds);
+            :}
         |   PYC
         ;
+
+lista_cases ::= lista_cases:l case_sent:c
+            {:
+                l.add(c);
+                RESULT = l;
+            :}
+            | case_sent:c 
+            {:
+                List<Case> l = new ArrayList<>();
+                l.add(c);
+                RESULT = l;
+            :}
+            ;
+
+case_sent ::= CASE exp:e DP lista_sent:s break_Opt:brk
+            {:
+                RESULT = new Case(e,s,brk);
+            :}
+            | CASE exp:e DP break_Opt:brk
+            {:
+                RESULT = new Case(e,new Bloque(PLXC.lex.getLine()),brk);
+            :}
+            ;
+
+break_Opt ::= BREAK PYC
+            {:
+                RESULT = new Break(PLXC.lex.getLine());
+            :}
+            |
+            {:
+                RESULT = null;
+            :}
+            ;
+
+defaultSW ::= DEFAULT DP lista_sent:s
+            {:
+                RESULT = s;
+            :}
+            |
+            {:
+                RESULT = null;
+            :}
+            ;
+
+lvalue  ::= IDENT:i
+        {:
+            Objeto obj = tabla.buscar(i);
+                if (obj == null) {
+                    throw new ParseException("Variable <" + i + "> no ha sido declarada", PLXC.lex.getLine());
+                }
+                RESULT = new ExpVariable(PLXC.lex.getLine(), (Variable)obj);
+        :}
+        |   array_index:a
+        {:
+            RESULT = a;
+        :}
+        ;
+
+expIn ::= ALL lista_exp:l CLL
+        {:
+            RESULT = l;
+        :}
+      |  exp:a
+        {:
+            RESULT = a;
+        :}
+;
 
 inicio_for  ::= lista_declaracion:l {: RESULT = l; :}
             |   exp:e               {: RESULT = e; :}
@@ -320,6 +415,7 @@ array   ::= ALL lista_exp:l CLL
             :}
         ;
 
+
 lista_exp   ::= lista_exp:l COMA exp:e
                 {:
                     l.addInstruccion(e);
@@ -351,6 +447,7 @@ inicio_bloque ::=
     bloqueActual = idBloque;
 :}
 ;
+
 
 lista_declaracion   ::= tipo:t IDENT:i
                         {:
@@ -591,6 +688,20 @@ exp ::= literal:l
                 e2
             ); // !e1 || e2 === e1 --> e2
         :}
+     |   exp:e1 DOBLEIMPLICA exp:e2
+        {:
+            Instruccion i1 = new CortoCircuito(PLXC.lex.getLine(), e1, Metodos.AND, e2); // e1 && e2
+            Instruccion i2_1 = new LlamadaMetodo(PLXC.lex.getLine(), e1, Metodos.NOT, null); // !e1
+            Instruccion i2_2 = new LlamadaMetodo(PLXC.lex.getLine(), e2, Metodos.NOT, null); // !e2
+            Instruccion i2 = new CortoCircuito(PLXC.lex.getLine(), i2_1, Metodos.AND, i2_2); // !e1 && !e2
+            RESULT = new CortoCircuito(
+                PLXC.lex.getLine(),
+                i1,
+                Metodos.OR,
+                i2
+            ); // (e1 && e2) || (!e1 && !e2) e1 <--> e2
+        :}
+    
     |   exp:e1 AND exp:e2
         {:
             RESULT = new CortoCircuito(
@@ -695,7 +806,65 @@ exp ::= literal:l
                 e
             );
         :}
+    |   EXISTS IDENT:i COMA exp:e
+        {:
+            Objeto obj = tabla.buscar(i);
+
+            if(obj == null){
+                throw new ParseException("Variable <" + i + "> no ha sido declarada", PLXC.lex.getLine());
+            }
+
+            Variable var = (Variable) obj;
+
+            if(var.getTipo() != TipoBool.instancia){
+                throw new ParseException("Variable <" + var.getNombre() + "> no es de tipo " + Tipo.Predefinidos.BOOL, PLXC.lex.getLine());
+            }
+
+            Literal uno = new Literal(bloqueActual,TipoInt.instancia,1);
+            Instruccion st = new ExpLiteral(PLXC.lex.getLine(), uno);
+
+             RESULT = new Exists(
+                PLXC.lex.getLine(),
+                var,
+                0, 1, st,
+                e
+            );
+        :}
+    |   EXISTS IDENT:i FROM ENTERO:left TO ENTERO:right step:st COMA exp:e
+        {:
+            Objeto obj = tabla.buscar(i);
+
+            if(obj == null){
+                throw new ParseException("Variable <" + i + "> no ha sido declarada", PLXC.lex.getLine());
+            }
+
+            Variable var = (Variable) obj;
+
+            if(var.getTipo() != TipoInt.instancia){
+                throw new ParseException("Variable <" + var.getNombre() + "> no es de tipo " + Tipo.Predefinidos.INT, PLXC.lex.getLine());
+            }
+
+            RESULT = new Exists(
+                PLXC.lex.getLine(),
+                var,
+                left, right, st,
+                e
+            );
+        
+        :}
+    |   exp:e1 INTER exp:e2 DP exp:e3
+        {:
+            
+            RESULT = new Ternario(PLXC.lex.getLine(), e1, e2, e3);
+        
+        :}
+    |   exp:e1 ELVIS exp:e2 
+        {:
+            RESULT = new Elvis(PLXC.lex.getLine(), e1, e2);
+        
+        :}
     ;
+
 
 op_aditivo  ::= MAS     {: RESULT = Metodos.SUMA; :}
             |   MENOS   {: RESULT = Metodos.RESTA; :}
@@ -726,6 +895,7 @@ op_asignacion   ::= ASIG        {: RESULT = Metodos.ASIGNAR; :}
                 ;
 
 op_unario   ::= MENOS       {: RESULT = Metodos.OPUESTO; :}
+            |   MAS         {: RESULT = Metodos.MASUNARIO; :}
             |   MASMAS      {: RESULT = Metodos.SIG; :}
             |   MENOSMENOS  {: RESULT = Metodos.ANT; :}
             ;
@@ -739,6 +909,7 @@ tipo    ::= INT     {: RESULT = TipoInt.instancia; :}
         |   FLOAT   {: RESULT = TipoFloat.instancia; :}
         |   BOOLEAN {: RESULT = TipoBool.instancia; :}
         |   STRING  {: RESULT = new TipoString(0); :}
+        |   tipo:t AC CC {: RESULT = new TipoArray(0,t); :}
         ;
 
 literal ::= ENTERO:e    {: RESULT = new Literal(bloqueActual, TipoInt.instancia, e); :}

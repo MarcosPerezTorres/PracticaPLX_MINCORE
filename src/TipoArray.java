@@ -140,6 +140,60 @@ public class TipoArray extends Tipo {
                 PLXC.out.println(etqFin + ":");
 
                 return new VariableArray(instancia.getNombre(), tmp, instancia.getBloque(), true, tipo.getTipoBase());
+            case Metodos.CAST:
+                
+                if (!(params[0] instanceof Tipo)){
+                    throw new ParseException(params[0].getNombre() + " no es un tipo", linea);
+                }
+
+                Tipo tipoDestino = (Tipo) params[0];
+
+                // Convertir int[] a char[]
+                if (tipoDestino instanceof TipoArray && !(tipoDestino instanceof TipoString) && ((TipoArray) tipoDestino).getTipoBase() instanceof TipoChar) {
+                if (!(this.getTipoBase() instanceof TipoInt)) {
+                    throw new ParseException("Solo se puede convertir un array de enteros a array de caracteres", linea);
+                }
+
+                TipoArray nuevoTipo = new TipoArray(this.getSize(), TipoChar.instancia);
+                VariableArray nuevoArray = new VariableArray(Objeto.nuevoNombre(), "0", instancia.getBloque(), false, nuevoTipo);
+
+                for (int i = 0; i < this.getSize(); i++) {
+                    tmp = Objeto.nuevoNombre();
+                    PLXC.out.println(tmp + " = " + ((VariableArray) instancia).getID(i) + ";");
+                    PLXC.out.println(nuevoArray.getID(i) + " = " + tmp + ";");
+                }
+
+                return nuevoArray;
+            }
+
+                if (tipoDestino instanceof TipoString){
+                    // Convertir char[] a String
+                    if (this.getTipoBase() instanceof TipoChar){
+                        TipoString nuevoTipo = new TipoString(this.getSize());
+                        VariableArray nuevoString = new VariableArray(Objeto.nuevoNombre(), "0", instancia.getBloque(), false, nuevoTipo);
+
+                        for (int i = 0; i < this.getSize(); i++){
+                        tmp = Objeto.nuevoNombre();
+                        PLXC.out.println(tmp + " = " + ((VariableArray) instancia).getID(i) + ";");
+                        PLXC.out.println(nuevoString.getID(i) + " = " + tmp + ";");
+                    }
+                return nuevoString;
+            
+                // Convertir int[] a String
+                } else if (this.getTipoBase() instanceof TipoInt){
+                    TipoString nuevoTipo = new TipoString(this.getSize());
+                    VariableArray nuevoString = new VariableArray(Objeto.nuevoNombre(), "0", instancia.getBloque(), false, nuevoTipo);
+
+                    for (int i = 0; i < this.getSize(); i++){
+                        tmp = Objeto.nuevoNombre();
+                        PLXC.out.println(tmp + " = " + ((VariableArray) instancia).getID(i) + ";");
+                        PLXC.out.println(nuevoString.getID(i) + " = " + tmp + ";");
+                     }
+                return nuevoString;
+                }
+
+            }
+                throw new ParseException("No se puede convertir " + this.getNombre() + " a " + tipoDestino.getNombre(), linea);
             default:
                 throw new ParseException("Método " + metodo + " no permitido para tipo array", linea);
         }

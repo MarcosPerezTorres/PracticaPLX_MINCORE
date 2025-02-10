@@ -35,10 +35,13 @@ IDENT = [a-zA-Z]+[0-9]*
     ")" { return new Symbol(sym.CP); }
     "[" { return new Symbol(sym.AC); }
     "]" { return new Symbol(sym.CC); }
+    ":" { return new Symbol(sym.DP); }
     ";" { return new Symbol(sym.PYC); }
     "." { return new Symbol(sym.PUNTO); }
     "," { return new Symbol(sym.COMA); }
     "=" { return new Symbol(sym.ASIG); }
+    "?" { return new Symbol(sym.INTER);}
+    "?:" { return new Symbol(sym.ELVIS);}
 
     "<"  { return new Symbol(sym.MENOR); }
     "<=" { return new Symbol(sym.MENORIGUAL); }
@@ -66,6 +69,7 @@ IDENT = [a-zA-Z]+[0-9]*
     "||"  { return new Symbol(sym.OR); }
     "!"   { return new Symbol(sym.NOT); }
     "-->" { return new Symbol(sym.IMPLICA); }
+    "<-->" { return new Symbol(sym.DOBLEIMPLICA); }
 
     print  { return new Symbol(sym.PRINT); }
     length { return new Symbol(sym.LENGTH); }
@@ -73,6 +77,7 @@ IDENT = [a-zA-Z]+[0-9]*
     while  { return new Symbol(sym.WHILE); }
     for    { return new Symbol(sym.FOR); }
     forall { return new Symbol(sym.FORALL); }
+    exists { return new Symbol(sym.EXISTS); }
     from   { return new Symbol(sym.FROM); }
     to     { return new Symbol(sym.TO); }
     downto { return new Symbol(sym.DOWNTO); }
@@ -86,6 +91,11 @@ IDENT = [a-zA-Z]+[0-9]*
     first  { return new Symbol(sym.FIRST); }
     last    { return new Symbol(sym.LAST); }
     select { return new Symbol(sym.SELECT); }
+    in      { return new Symbol(sym.IN); }
+    switch { return new Symbol(sym.SWITCH); }
+    case    { return new Symbol(sym.CASE); }
+    break  { return new Symbol(sym.BREAK); }
+    just  { return new Symbol(sym.JUST); }
 
     int     { return new Symbol(sym.INT); }
     char    { return new Symbol(sym.CHAR); }

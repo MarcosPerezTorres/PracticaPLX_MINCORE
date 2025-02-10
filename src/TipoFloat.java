@@ -211,6 +211,11 @@ public class TipoFloat extends Tipo {
                 PLXC.out.println(var.getID() + " = 0 -r " + instancia.getID() + ";"); // $t0 = 0 - a;
 
                 return var;
+            case Metodos.MASUNARIO:
+                var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
+                PLXC.out.println(var.getID() + " = " + instancia.getID() + ";"); // $t0 = a;
+
+                return var;
             default:
                 throw new ParseException("Método " + metodo + " no permitido para " + getNombre(), linea);
         }

@@ -13,6 +13,7 @@ public class Metodos {
     public static final String OPUESTO = "$opuesto";
     public static final String SIG = "$siguiente"; // ++
     public static final String ANT = "$anterior"; // --
+    public static final String MASUNARIO = "$masunario"; // +x
 
     public static final String AND = "$and";
     public static final String OR = "$or";

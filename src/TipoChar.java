@@ -106,6 +106,11 @@ public class TipoChar extends Tipo {
 
                 PLXC.out.println(obj.getID() + ";");
                 return var;
+            case Metodos.MASUNARIO:
+                var = new Variable(nuevoNombre(), instancia.getBloque(), false, TipoInt.instancia);
+                PLXC.out.println(var.getID() + " = " + instancia.getID() + ";"); // $t0 = a;
+
+                return var;
             default:
                 throw new ParseException("Método " + metodo + " no permitido para " + getNombre(), linea);
         }

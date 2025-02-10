@@ -1,3 +1,4 @@
+
 public abstract class Instruccion {
     private int linea;
 
@@ -8,4 +9,5 @@ public abstract class Instruccion {
     public int getLinea() { return this.linea; }
 
     public abstract Objeto generarCodigo() throws Exception;
+
 }

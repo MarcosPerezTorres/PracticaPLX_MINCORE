@@ -11,6 +11,9 @@ public class ExpArray extends Bloque {
 
     @Override
     public Objeto generarCodigo() throws Exception {
+        if (instrucciones.size() == 0) {
+            throw new ParseException("Literal de array vacío", getLinea());
+        }
         // Generamos el código para cada instrucción  y metemos el resultado en "elementos"
         Objeto obj = instrucciones.get(0).generarCodigo();
 

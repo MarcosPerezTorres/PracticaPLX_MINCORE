@@ -96,6 +96,23 @@ public class TipoBool extends Tipo {
                 var = new Variable(nuevoNombre(), instancia.getBloque(), false, this);
                 PLXC.out.println(var.getID() + " = 1 - " + instancia.getID() + ";");
                 return var;
+                
+            case Metodos.CAST:
+                if(!(params[0] instanceof Tipo)) {
+                    throw new ParseException(params[0].getNombre() + " no es un tipo", linea);
+                }
+                switch(params[0].getNombre()) {
+                    case Predefinidos.INT:
+                        // Se crea una variable temporal de tipo int.
+                        var = new Variable(nuevoNombre(), instancia.getBloque(), false, (Tipo) params[0]);
+                        // Como en el .flex se asigna 1 o 0, solo copiamos ese valor:
+                        PLXC.out.println(var.getID() + " = " + instancia.getID() + ";");
+                        return var;
+                    case Predefinidos.BOOL:
+                        return instancia;
+                    default:
+                        throw new ParseException("No se puede convertir un " + getNombre() + " a " + params[0].getNombre(), linea);
+                }
             default:
                 throw new ParseException("Método " + metodo + " no permitido para " + getNombre(), linea);
         }

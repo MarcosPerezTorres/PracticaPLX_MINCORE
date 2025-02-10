@@ -1,3 +1,4 @@
+
 public class ExpVariable extends Instruccion {
     private Variable v;
 
@@ -10,4 +11,6 @@ public class ExpVariable extends Instruccion {
     public Objeto generarCodigo() throws Exception {
         return v;
     }
+
+
 }
